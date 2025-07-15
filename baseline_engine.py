@@ -58,10 +58,9 @@ def detect_anomaly(user_id, current_session, baselines, threshold=0.35, critical
                 return "Anomaly", 1.0
 
             # Scaled scoring (only if deviation > 0.2)
-            if deviation > 0.2:
-                scaled = min(deviation, 1.0)
-                score += weight * scaled
-                total_weight += weight  # Only include if deviation significant
+            scaled = min(deviation, 1.0)
+            score += weight * scaled
+            total_weight += weight 
 
         # CATEGORICAL FEATURE (non-strict ones)
         elif base != curr:

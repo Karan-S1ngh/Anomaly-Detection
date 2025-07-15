@@ -21,32 +21,40 @@ def save_baselines(baselines):
     with open(BASELINE_FILE, "w") as f:
         json.dump(baselines, f, indent=4)
 
-def save_user_session(user_id, session_data):
+def save_user_session(user_id, session_data, status=None):
     file_path = os.path.join(SESSION_DIR, f"{user_id}.csv")
+    
+    # Add label if provided
+    if status:
+        session_data["anomaly_label"] = "Anomaly" if "Anomaly" in status else "Normal"
+    
+    # Ensure timestamp is added
+    session_data["timestamp"] = datetime.datetime.now()
+
     df = pd.DataFrame([session_data])
-    df["timestamp"] = datetime.datetime.now()
+
     if os.path.exists(file_path):
         df.to_csv(file_path, mode="a", header=False, index=False)
     else:
         df.to_csv(file_path, index=False)
 
 def handle_login_session(user_id, session_data):
-    # Ensure only expected features are used
+    # Only expected features
     session_data = {k: session_data[k] for k in features if k in session_data}
 
-    # Save the session for audit/logging
-    save_user_session(user_id, session_data)
-
-    # Load stored baselines
+    # Load baseline
     baselines = load_baselines()
 
-    # First-time user: store as baseline
     if user_id not in baselines:
         baselines[user_id] = session_data
         save_baselines(baselines)
+        save_user_session(user_id, session_data, "First-time user")
         return "First-time user (baseline saved)", 0.0
 
-    # Compare current session to baseline
+    # Detect anomaly
     status, score = detect_anomaly(user_id, session_data, baselines)
+
+    # Save session with label
+    save_user_session(user_id, session_data, status)
 
     return status, score
