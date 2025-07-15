@@ -13,7 +13,7 @@ def process_behavior_session(user_id, session_data):
     
     Returns:
         dict: {
-            "status": "✅ Normal" or "❌ Anomaly",
+            "status": "Normal" or "Anomaly",
             "score": float (0 to 1),
             "action": str (e.g., "Allow", "Trigger Re-Verification")
         }
@@ -21,7 +21,7 @@ def process_behavior_session(user_id, session_data):
     status, score = handle_login_session(user_id, session_data)
     
     # Decide action based on anomaly score
-    if status == "❌ Anomaly":
+    if status == "Anomaly":
         action = "Trigger Re-Verification"
     else:
         action = "Allow"
